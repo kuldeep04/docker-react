@@ -1,0 +1,20 @@
+version: 'v2.39.4-desktop.1'
+
+services:
+  frontend:
+    build: 
+        context: .
+        dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - /app/node_modules
+      - .:/app
+  tests:
+    build: 
+        context: .
+        dockerfile: Dockerfile.dev
+    command: npm test
+    volumes:
+      - /app/node_modules
+      - .:/app
