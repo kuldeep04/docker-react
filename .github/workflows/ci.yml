@@ -27,3 +27,21 @@ jobs:
       # Runs the tests inside the newly built Docker container
       - name: Run Tests
         run: docker run -e CI=true kuldeep04/docker-react npm run test -- --coverage
+
+      # 4. Zip the source code (This replicates what Travis CI did automatically)
+      # We zip everything EXCEPT the .git folder and local node_modules to keep it small  
+      - name: Create Deployment Package
+        run: zip -r deploy.zip . -x "*.git*" "node_modules/*"
+    
+      # 5. Deploy the zipped source code to AWS Elastic Beanstalk
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v22
+        with:
+            aws_access_key: ${{ secrets.AWS_BEANSTALK_ACCESS_KEY }}
+            aws_secret_key: ${{ secrets.AWS_BEANSTALK_SECRET_KEY }}
+            application_name: frontend
+            environment_name: Frontend-env
+            version_label: "deploy-${{ github.sha }}"
+            region: us-east-1
+            existing_bucket_name: elasticbeanstalk-us-east-1-905542450286
+            deployment_package: deploy.zip
